@@ -1,11 +1,13 @@
-
 th = 4; //matrialtykkelse
-min_th = 2;
-head_r = 50;
+min_th = 4;
+body_r = 100;
+head_r = body_r*5/7;
 eye_r = head_r/5;
-nose_w = head_r/3;
-body_r = 70;
+nose_w = head_r/2.5;
 foot_r = head_r/2;
+side_w = 50;
+lid_r = body_r/2;
+lid_center_r = lid_r/2;
 
 module front ()
 {
@@ -17,6 +19,56 @@ module front ()
 	  mirror([1,0,0]) translate([head_r/4,head_r/4,0]) earshape(head_r);
 	  translate([foot_r*1.2, -head_r*2.25,0]) footshape();
 	  mirror([1,0,0]) translate([foot_r*1.2, -head_r*2.25,0]) footshape();
+     }
+}
+
+module back ()
+{
+     difference ()
+     {
+	  front();
+	  translate([0,-head_r*4/5,0]) lid();
+     }
+}
+
+module lid()
+{
+     cylinder(th, r = lid_r, center=false);
+}
+
+module lid_center()
+{
+     cylinder(th, r = lid_center_r, center=false);
+}
+
+module lid_lock()
+{
+     union()
+     {
+	  difference ()
+	  {
+	       lid();
+	       union()
+	       {
+		    translate([0,0,0]) cube([lid_r,lid_r,th]);
+		    translate([-lid_r,-lid_r,0]) cube([lid_r,lid_r,th]);
+	       }
+	  }
+	  lid_center();
+     }
+}
+
+module innerPlateFront ()
+{
+     cylinder(th, r = body_r-th, center=false);
+}
+
+module innerPlateBack ()
+{
+     difference ()
+     {
+	  innerPlateFront();
+	  lid_lock();
      }
 }
 
@@ -145,6 +197,33 @@ module display()
      translate([0,-head_r/3,th*2]) nose();
      translate([foot_r*1.2, -head_r*2.25,th]) foot();
      mirror([1,0,0]) translate([foot_r*1.2, -head_r*2.25,th]) foot();
+     translate([0,-head_r*4/5,-th]) innerPlateFront();
+     translate([0,-head_r*4/5,-side_w+th]) innerPlateBack();
+     translate([0,0,-side_w]) back();
+
+     translate([0,-head_r*4/5,-side_w*1.5]) lid_lock();
+     translate([0,-head_r*4/5,-side_w*1.5 -th]) lid_center();
+     translate([0,-head_r*4/5,-side_w*1.5 -th*2]) lid();
 }
+
+module flat()
+{
+     front();
+     translate([-body_r*1.7,0,0]) hode();
+     translate([-body_r*1.6,-body_r,0]) nose();
+     translate([-body_r*2, -body_r*1.5,0]) foot();
+     translate([-body_r*2, -body_r*2.5,0]) mirror([1,0,0]) foot();
+     translate([body_r*4,0,0]) innerPlateFront();
+     translate([body_r*4,-body_r*2,0]) innerPlateBack();
+     translate([body_r*2,0,0]) back();
+     translate([-body_r*1.3,-body_r*1.6,0]) lid_center();
+}
+
 display();
+//projection(cut = true) flat();
+
+
+//livingHinge2D(hingeLength(90,10), side_w/2, th);
+//mirror([0,0,0]) livingHinge2D(hingeLength(90,10), side_w/2, th);
+//lid_lock();
 
