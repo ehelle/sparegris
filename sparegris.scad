@@ -4,9 +4,21 @@ min_th = 2;
 head_r = 50;
 eye_r = head_r/5;
 nose_w = head_r/3;
+body_r = 70;
+foot_r = head_r/2;
 
-
-
+module front ()
+{
+     union ()
+     {
+	  translate([0,-head_r*4/5,0]) cylinder(th, r = body_r, [0,0,0]);
+	  cylinder(th, r = head_r, [0,0,0]);
+	  translate([head_r/4,head_r/4,0]) earshape(head_r);
+	  mirror([1,0,0]) translate([head_r/4,head_r/4,0]) earshape(head_r);
+	  translate([foot_r*1.2, -head_r*2.25,0]) footshape();
+	  mirror([1,0,0]) translate([foot_r*1.2, -head_r*2.25,0]) footshape();
+     }
+}
 
 module hode ()
 {
@@ -24,6 +36,29 @@ module hode ()
 		    cylinder(th, r = eye_r, [0,0,0]);
 	       translate([-head_r/3,head_r/4,0])
 		    cylinder(th, r = eye_r, [0,0,0]);
+	  }
+     }
+}
+
+module footshape ()
+{
+     difference ()
+     {
+	  cylinder(th, r = foot_r, center=false);
+	  translate([-foot_r,-foot_r*2,0]) cube([foot_r*2,foot_r*2,th]);
+     }
+}
+
+module foot ()
+{
+     difference ()
+     {
+	  footshape();
+	  translate([-body_r*0.75,-body_r*0.4,0])
+	  difference ()
+	  {
+	       cylinder(th, r = body_r, center=false);
+	       translate([-body_r*0.4+min_th,0,0]) cylinder(th, r = body_r*1.3, center=false);
 	  }
      }
 }
@@ -103,8 +138,13 @@ module polyline(points, width = 1) {
     polyline_inner(points, 1);
 }
 // -copy end
-
-hode();
-translate([0,-head_r/3,th]) nose();
-//ear(head_r);
+module display()
+{
+     front();
+     translate([0,0,th]) hode();
+     translate([0,-head_r/3,th*2]) nose();
+     translate([foot_r*1.2, -head_r*2.25,th]) foot();
+     mirror([1,0,0]) translate([foot_r*1.2, -head_r*2.25,th]) foot();
+}
+display();
 
