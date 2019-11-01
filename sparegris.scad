@@ -1,3 +1,4 @@
+PI = 3.14;
 th = 4; //matrialtykkelse
 min_th = 4;
 body_r = 100;
@@ -6,8 +7,12 @@ eye_r = head_r/5;
 nose_w = head_r/2.5;
 foot_r = head_r/2;
 side_w = 50;
+side_c = (body_r-(th/2))*2*PI;
 lid_r = body_r/2;
 lid_center_r = lid_r/2;
+coin_w = 8;
+hinge_sp = 6;
+hinge_w = 0.2;
 
 module front ()
 {
@@ -190,6 +195,41 @@ module polyline(points, width = 1) {
     polyline_inner(points, 1);
 }
 // -copy end
+
+module side()
+{
+     difference()
+     {
+	  cube([side_c,side_w,th]);
+	  union()
+	  {
+	       translate([side_c/2-(coin_w/2), side_w/2-(side_w*0.35), 0])
+		    cube([coin_w, side_w*0.7,th]);
+	       hinge_group();
+	       translate([side_c,0,0]) mirror([1,0,0]) hinge_group();
+	  }
+     }
+}
+
+module hinge_group()
+{
+     n_hinge_elmt_side = floor((side_c-(coin_w*2))/2 / (hinge_sp*2)) - 1;
+     for(i = [0:n_hinge_elmt_side])
+     {
+	  translate([i*hinge_sp*2,0,0]) hinge_elmt();
+     }
+}
+
+module hinge_elmt()
+{
+     union()
+     {
+	  translate([hinge_sp,side_w*0.15,0]) cube([hinge_w,side_w*0.7,th]);
+	  translate([hinge_sp*2, 0, 0]) cube([hinge_w,side_w*0.35,th]);
+	  translate([hinge_sp*2, side_w*0.65, 0]) cube([hinge_w,side_w*0.35,th]);
+     }
+}
+
 module display()
 {
      front();
@@ -212,17 +252,19 @@ module flat()
      translate([-body_r*1.7,0,0]) hode();
      translate([-body_r*1.6,-body_r,0]) nose();
      translate([-body_r*2, -body_r*1.5,0]) foot();
-     translate([-body_r*2, -body_r*2.5,0]) mirror([1,0,0]) foot();
+     translate([-body_r*3, 0,0]) mirror([1,0,0]) foot();
      translate([body_r*4,0,0]) innerPlateFront();
      translate([body_r*4,-body_r*2,0]) innerPlateBack();
      translate([body_r*2,0,0]) back();
-     translate([-body_r*1.3,-body_r*1.6,0]) lid_center();
+     translate([-body_r*1.3,-body_r*1.5,0]) lid_center();
+     translate([-body_r*3.5,-body_r*2.3,0]) side();
 }
 
 display();
-//projection(cut = true) flat();
+//projection(cut = false) flat();
 
 
+//side();
 //livingHinge2D(hingeLength(90,10), side_w/2, th);
 //mirror([0,0,0]) livingHinge2D(hingeLength(90,10), side_w/2, th);
 //lid_lock();
